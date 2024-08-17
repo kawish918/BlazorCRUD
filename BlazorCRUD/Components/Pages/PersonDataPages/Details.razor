@@ -1,0 +1,74 @@
+﻿@page "/persondata/details"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorCRUD.Models
+@inject IDbContextFactory<BlazorCRUD.Data.BlazorCRUDContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Person Details</PageTitle>
+
+<h1>Person Details</h1>
+
+<div>
+    <h4>Person Information</h4>
+    <hr />
+
+    @if (persondata is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <dl class="row">
+            <dt class="col-sm-3">First Name</dt>
+            <dd class="col-sm-9">@persondata.FirstName</dd>
+
+            <dt class="col-sm-3">Last Name</dt>
+            <dd class="col-sm-9">@persondata.LastName</dd>
+
+            <dt class="col-sm-3">Gender</dt>
+            <dd class="col-sm-9">@persondata.Gender</dd>
+
+            <dt class="col-sm-3">Date of Birth</dt>
+            <dd class="col-sm-9">@persondata.BirthDay</dd>
+
+            <dt class="col-sm-3">Phone</dt>
+            <dd class="col-sm-9">@persondata.Phone</dd>
+
+            <dt class="col-sm-3">Street</dt>
+            <dd class="col-sm-9">@persondata.Street</dd>
+
+            <dt class="col-sm-3">City</dt>
+            <dd class="col-sm-9">@persondata.City</dd>
+
+            <dt class="col-sm-3">State</dt>
+            <dd class="col-sm-9">@persondata.State</dd>
+
+            <dt class="col-sm-3">Zip Code</dt>
+            <dd class="col-sm-9">@persondata.ZipCode</dd>
+        </dl>
+
+        <div class="mt-4">
+            <a href="@($"/persondata/edit?id={persondata.Id}")" class="btn btn-primary me-2">Edit</a>
+            <a href="/persondata" class="btn btn-secondary">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private PersonData? persondata;
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        persondata = await context.PersonData.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (persondata is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

@@ -1,0 +1,136 @@
+﻿@page "/PersonData/edit"
+
+@using Microsoft.EntityFrameworkCore
+@using BlazorCRUD.Models
+@inject IDbContextFactory<BlazorCRUD.Data.BlazorCRUDContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit Person</PageTitle>
+
+<h1>Edit Person</h1>
+
+<h4>Person Details</h4>
+<hr />
+
+@if (PersonData is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-6">
+            <EditForm Model="PersonData" OnValidSubmit="UpdatePersonData">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label for="firstname" class="form-label">First Name</label>
+                    <InputText id="firstname" @bind-Value="PersonData.FirstName" class="form-control" />
+                    <ValidationMessage For="() => PersonData.FirstName" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="lastname" class="form-label">Last Name</label>
+                    <InputText id="lastname" @bind-Value="PersonData.LastName" class="form-control" />
+                    <ValidationMessage For="() => PersonData.LastName" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="gender" class="form-label">Gender</label>
+                    <InputText id="gender" @bind-Value="PersonData.Gender" class="form-control" />
+                    <ValidationMessage For="() => PersonData.Gender" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="birthday" class="form-label">Date of Birth</label>
+                    <InputDate id="birthday" @bind-Value="PersonData.BirthDay" class="form-control" />
+                    <ValidationMessage For="() => PersonData.BirthDay" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <InputText id="phone" @bind-Value="PersonData.Phone" class="form-control" />
+                    <ValidationMessage For="() => PersonData.Phone" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="street" class="form-label">Street Address</label>
+                    <InputText id="street" @bind-Value="PersonData.Street" class="form-control" />
+                    <ValidationMessage For="() => PersonData.Street" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="city" class="form-label">City</label>
+                    <InputText id="city" @bind-Value="PersonData.City" class="form-control" />
+                    <ValidationMessage For="() => PersonData.City" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="state" class="form-label">State</label>
+                    <InputText id="state" @bind-Value="PersonData.State" class="form-control" />
+                    <ValidationMessage For="() => PersonData.State" class="text-danger" />
+                </div>
+
+                <div class="mb-3">
+                    <label for="zipcode" class="form-label">Zip Code</label>
+                    <InputText id="zipcode" @bind-Value="PersonData.ZipCode" class="form-control" />
+                    <ValidationMessage For="() => PersonData.ZipCode" class="text-danger" />
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="/persondata" class="btn btn-secondary ms-2">Cancel</a>
+            </EditForm>
+        </div>
+    </div>
+}
+
+
+
+@code {
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    public PersonData? PersonData { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        PersonData = await context.PersonData.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (PersonData is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    public async Task UpdatePersonData()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(PersonData!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!PersonDataExists(PersonData!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/persondata");
+    }
+
+    bool PersonDataExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.PersonData.Any(e => e.Id == id);
+    }
+}

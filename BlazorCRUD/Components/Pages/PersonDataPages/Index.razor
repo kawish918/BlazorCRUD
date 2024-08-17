@@ -1,0 +1,66 @@
+﻿@page "/persondata"
+
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using BlazorCRUD.Models
+@inject IDbContextFactory<BlazorCRUD.Data.BlazorCRUDContext> DbFactory
+
+<PageTitle>Person Data</PageTitle>
+
+<h1>Person Data</h1>
+
+<div class="actions">
+    <a href="persondata/create" class="btn btn-primary">Create New</a>
+</div>
+
+<QuickGrid Class="table table-striped table-hover" Items="DbFactory.CreateDbContext().PersonData">
+    <PropertyColumn Property="persondata => persondata.FirstName" Title="First Name" />
+    <PropertyColumn Property="persondata => persondata.LastName" Title="Last Name" />
+    <PropertyColumn Property="persondata => persondata.Gender" Title="Gender" />
+    <PropertyColumn Property="persondata => persondata.BirthDay" Title="Date of Birth" />
+    <PropertyColumn Property="persondata => persondata.Phone" Title="Phone Number" />
+    <PropertyColumn Property="persondata => persondata.City" Title="City" />
+
+    <TemplateColumn Context="persondata">
+        <div class="action-buttons">
+            <!-- Edit Link -->
+            <a href="@($"persondata/edit?id={persondata.Id}")" class="btn btn-outline-secondary btn-sm" title="Edit">
+                <img src="/Img/edit.png" alt="Edit" class="img-icon" /> Edit
+            </a>
+
+            <!-- Details Link -->
+            <a href="@($"persondata/details?id={persondata.Id}")" class="btn btn-outline-info btn-sm" title="Details">
+                <img src="/Img/details.png" alt="Details" class="img-icon" /> Details
+            </a>
+
+            <!-- Delete Link -->
+            <a href="@($"persondata/delete?id={persondata.Id}")" class="btn btn-outline-danger btn-sm" title="Delete">
+                <img src="/Img/trash.png" alt="Delete" class="img-icon" /> Delete
+            </a>
+        </div>
+    </TemplateColumn>
+</QuickGrid>
+
+<style>
+    .img-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+    }
+
+    .actions {
+        margin-bottom: 15px;
+    }
+
+    .action-buttons a {
+        margin-right: 10px;
+    }
+</style>
+
+@code {
+    private IEnumerable<PersonData> GetPersonData()
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.PersonData.ToList();
+    }
+}
